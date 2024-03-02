@@ -176,7 +176,16 @@ class SendBox(toga.Box):
                 color=rgb(240, 248, 255),
                 padding=(5, 0, 10, 10),
             ),
-            on_change=self.check_balance,
+            on_change=self.check_balance_t,
+        )
+
+        self.check_amount_t_label = toga.Label(
+            "",
+            style=Pack(
+                font_family="monospace",
+                font_size="10",
+                text_align="center"
+            )
         )
             
         self.amount_t_box = toga.Box(
@@ -190,6 +199,7 @@ class SendBox(toga.Box):
                         padding=(10, 0, 0, 10)
                     )
                 ),
+                self.check_amount_t_label,
                 self.amount_t
             ],
             style=Pack(
@@ -280,6 +290,16 @@ class SendBox(toga.Box):
                 font_family="monospace",
                 color=rgb(240, 248, 255),
                 padding=(5, 0, 10, 10),
+            ),
+            on_change=self.check_balance_z
+        )
+
+        self.check_amount_z_label = toga.Label(
+            "",
+            style=Pack(
+                font_family="monospace",
+                font_size="10",
+                text_align="center"
             )
         )
             
@@ -294,6 +314,7 @@ class SendBox(toga.Box):
                         padding=(10, 0, 0, 10)
                     )
                 ),
+                self.check_amount_z_label,
                 self.amount_z
                 
             ],
@@ -435,18 +456,36 @@ class SendBox(toga.Box):
                 self.t_address_box.remove(self.current_t_balance_label)
                 
     
-    def check_balance(self, number_input):
+    def check_balance_t(self, number_input):
         selected_address = self.selection_t.value.address if self.selection_t.value else None
         if selected_address:
             config_path = self.app.paths.config / 'config.json'
             balance_t = get_address_balance(config_path, selected_address)
             entered_amount = number_input.value
             if entered_amount > balance_t:
-                print("Insufficient balance.")
+                self.check_amount_t_label.text = "Insufficient Balance !"
+                self.check_amount_t_label.style.color=rgb(236, 8, 8)
             else:
-                print("Valid amount.")
+                self.check_amount_t_label.text = ""
         else:
-            print("No address selected.")
+            self.check_amount_t_label.text = "Select Address"
+            self.check_amount_t_label.style.color=rgb(236, 8, 8)
+            
+            
+    def check_balance_z(self, number_input):
+        selected_address = self.selection_z.value.address if self.selection_z.value else None
+        if selected_address:
+            config_path = self.app.paths.config / 'config.json'
+            balance_z = get_address_balance(config_path, selected_address)
+            entered_amount = number_input.value
+            if entered_amount > balance_z:
+                self.check_amount_z_label.text = "Insufficient Balance !"
+                self.check_amount_z_label.style.color=rgb(236, 8, 8)
+            else:
+                self.check_amount_z_label.text = ""
+        else:
+            self.check_amount_z_label.text = "Select Address"
+            self.check_amount_z_label.style.color=rgb(236, 8, 8)
             
     
     async def on_change_z_selection(self, selection):
