@@ -1,0 +1,40 @@
+# This project was generated with 0.3.17 using template: https://github.com/beeware/briefcase-template@v0.3.17
+[tool.briefcase]
+project_name = "BitcoinZ Mobile Node"
+bundle = "com.btcz.bitcoinz"
+version = "1.0.0"
+url = "https://bitcoinz.btcz.com/btczmobilenode"
+license = "GNU General Public License v3 or later (GPLv3+)"
+author = "EzzyG"
+author_email = "ezzyg@bitcoinz.btcz.com"
+
+[tool.briefcase.app.btczmobilenode]
+formal_name = "Mobile Node"
+description = "later..."
+long_description = """More details about the app should go here.
+"""
+icon = "src/btczmobilenode/resources/btczmobilenode"
+sources = [
+    "src/btczmobilenode",
+]
+test_sources = [
+    "tests",
+]
+
+test_requires = [
+    "pytest",
+]
+
+[tool.briefcase.app.btczmobilenode.android]
+requires = [
+    "toga-android~=0.4.2",
+    "requests~=2.21.0",
+    "urllib3~=2.2.1",
+]
+
+build_gradle_dependencies = [
+    "androidx.appcompat:appcompat:1.6.1",
+    "com.google.android.material:material:1.11.0",
+    "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0",
+]
+
