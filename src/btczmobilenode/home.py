@@ -133,7 +133,11 @@ class MainBalanceBox(toga.Box):
             )
         )
         
-        self.add(self.balance_box, self.balances_box_devider, self.blockchain_info)
+        self.add(
+            self.balance_box,
+            self.balances_box_devider,
+            self.blockchain_info
+        )
 
     def format_total_balance(self, total):
         formatted_total = '{:.8f}'.format(total)  

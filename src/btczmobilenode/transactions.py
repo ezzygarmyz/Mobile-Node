@@ -70,11 +70,17 @@ class TransactionsBox(toga.Box):
                     )
                 )
                 
+                self.transaction_button = toga.Button(
+                    "Get Info",
+                    on_press=lambda widget, address=address: self.transaction_window(address)
+                )
+                
                 self.transactions_list_box = toga.Box(
                     children=[
                         self.address_label,
                         self.category_label,
-                        self.amount_label
+                        self.amount_label,
+                        self.transaction_button
                     ],
                     style=Pack(
                     direction=COLUMN,
@@ -123,7 +129,7 @@ class TransactionsBox(toga.Box):
                     "jsonrpc": "1.0",
                     "id": "0",
                     "method": "listtransactions",
-                    "params": [],
+                    "params": ["*", 100],
                 }
                 response = requests.post(
                     url,
@@ -139,3 +145,9 @@ class TransactionsBox(toga.Box):
                 
         else:
             return
+        
+    def transaction_window(self, address):
+        self.app.main_window.info_dialog(
+            "Address",
+            f"{address}"
+        )

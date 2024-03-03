@@ -200,7 +200,7 @@ class RPCSettingsBox(toga.Box):
                  self.space_box,
                  self.settings_buttons)
     
-    async def save_settings(self, button):
+    def save_settings(self, button):
         # Get values from input widgets
         rpcuser = self.rpc_user_box.children[1].value
         rpcpassword = self.rpc_password_box.children[1].value
@@ -228,6 +228,13 @@ class RPCSettingsBox(toga.Box):
                 existing_config = json.load(f)
         else:
             existing_config = {}
+            
+        # Compare new config with existing config
+        if new_config == existing_config:
+            # No changes, revert back to the original settings
+            self.setting_command.enabled = True
+            self.app.main_window.content = self.app.option_container
+            return
 
         existing_config.update(new_config)
 
@@ -236,9 +243,10 @@ class RPCSettingsBox(toga.Box):
         # Write the JSON data to the file
         with open(config_path, 'w') as f:
             f.write(config_json)
-        self.app.main_window.info_dialog("Done !", "RPC config have been saved")
-        self.app.startup()
+        self.app.main_window.info_dialog("Done !", "RPC config have been saved, please restart the app !")
+        self.setting_command.enabled = True
+        self.app.main_window.content = self.app.option_container
 
     def back_to_main(self, button):
-        self.app.main_window.toolbar.add(self.setting_command)
+        self.setting_command.enabled = True
         self.app.main_window.content = self.app.option_container

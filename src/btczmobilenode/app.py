@@ -105,7 +105,9 @@ class MobileApp(toga.App):
         # Set up the main window with the OptionContainer
         self.main_window = toga.MainWindow(title=self.formal_name)
         self.main_window.content = self.option_container
-        self.main_window.toolbar.add(self.setting_command)
+        self.main_window.toolbar.add(
+            self.setting_command
+        )
 
         # Show the main window
         self.main_window.show()
@@ -118,7 +120,7 @@ class MobileApp(toga.App):
         config_path = self.paths.config / 'config.json'
         
         # Switch the content of the main window to the RPCSettingsBox
-        self.main_window.toolbar.clear()
+        self.setting_command.enabled = False
         self.main_window.content = self.rpc_settings_box
 
         if os.path.exists(config_path):

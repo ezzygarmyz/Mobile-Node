@@ -176,9 +176,9 @@ class SendBox(toga.Box):
                 color=rgb(240, 248, 255),
                 padding=(5, 0, 10, 10),
             ),
-            on_change=self.check_balance_t,
+            on_change=self.check_balance_t
         )
-
+        
         self.check_amount_t_label = toga.Label(
             "",
             style=Pack(
@@ -208,16 +208,31 @@ class SendBox(toga.Box):
                 padding=5)
         )
         
-        self.button_t_send = toga.Button(
-            "SEND",
-            enabled=False,
+        self.fee_input = toga.NumberInput(
+            value=0.0001,
+            step=0.00000001,
+            min=0.00000001,
             style=Pack(
-                padding=5
+                font_family="monospace",
+                color=rgb(240, 248, 255),
+                padding=(5, 0, 10, 10),
+            ),
+        )
+        
+        self.fee_label = toga.Label(
+            f"Fee : [optional]",
+            style=Pack(
+                font_size="10",
+                font_family="monospace",
+                color=rgb(235, 186, 6),
+                padding=(10, 0, 0, 10)
             )
         )
-        self.button_t_box = toga.Box(
+        
+        self.transaction_fee_box = toga.Box(
             children=[
-                self.button_t_send
+                self.fee_label,
+                self.fee_input
             ],
             style=Pack(
                 direction=COLUMN,
@@ -232,13 +247,36 @@ class SendBox(toga.Box):
                 flex=1,
                 background_color=rgb(25, 25, 25)
             )
-        )    
+        )  
+        
+        self.button_t_send = toga.Button(
+            "SEND",
+            enabled=True,
+            style=Pack(
+                padding=5,
+                background_color=rgb(235, 186, 6),
+                color=rgb(240, 248, 255)
+            ),
+            on_press=self.on_press_button_t
+        )
+        
+        self.button_t_box = toga.Box(
+            children=[
+                self.button_t_send
+            ],
+            style=Pack(
+                direction=COLUMN,
+                background_color=rgb(60, 60, 60),
+                padding=5
+            )
+        )  
         
         self.add(
             self.send_switcher_box,
             self.t_address_box,
             self.send_t_box,
             self.amount_t_box,
+            self.transaction_fee_box,
             self.space_box,
             self.button_t_box)
         
@@ -293,7 +331,7 @@ class SendBox(toga.Box):
             ),
             on_change=self.check_balance_z
         )
-
+        
         self.check_amount_z_label = toga.Label(
             "",
             style=Pack(
@@ -326,7 +364,7 @@ class SendBox(toga.Box):
         )
         
         self.memo_text_input = toga.MultilineTextInput(
-            placeholder="Memo",
+            placeholder="[Optional]",
             style=Pack(
                 font_family="monospace",
                 color=rgb(240, 248, 255),
@@ -348,7 +386,7 @@ class SendBox(toga.Box):
         self.memo_box = toga.Box(
             children=[
                 toga.Label(
-                    "Memo :",
+                    "Memo : [optional]",
                     style=Pack(
                         font_size="10",
                         font_family="monospace",
@@ -367,10 +405,13 @@ class SendBox(toga.Box):
         
         self.button_z_send = toga.Button(
             "SEND",
-            enabled=False,
+            enabled=True,
             style=Pack(
-                padding=5
-            )
+                padding=5,
+                background_color=rgb(0, 179, 241),
+                color=rgb(240, 248, 255)
+            ),
+            on_press=self.on_press_button_z
         )
         
         self.button_z_box = toga.Box(
@@ -390,12 +431,14 @@ class SendBox(toga.Box):
             self.switch.text = "Shielded"
             self.switch.style.color = rgb(0, 179, 241)
             self.send_to_label.style.color = rgb(0, 179, 241)
+            self.fee_label.style.color = rgb(0, 179, 241)
             self.selection_t.items.clear()
             self.selection_z.items = self.address_z_items    
             self.remove(
                 self.t_address_box,
                 self.send_t_box,
                 self.amount_t_box,
+                self.transaction_fee_box,
                 self.space_box,
                 self.button_t_box
             )
@@ -403,6 +446,7 @@ class SendBox(toga.Box):
                 self.z_address_box,
                 self.send_t_box,
                 self.amount_z_box,
+                self.transaction_fee_box,
                 self.memo_box,
                 self.space_box,
                 self.button_z_box
@@ -411,12 +455,14 @@ class SendBox(toga.Box):
             self.switch.text = "Transparent"
             self.switch.style.color = rgb(235, 186, 6)
             self.send_to_label.style.color = rgb(235, 186, 6)
+            self.fee_label.style.color = rgb(235, 186, 6)
             self.selection_z.items.clear()
             self.selection_t.items = self.address_t_items 
             self.remove(
                 self.z_address_box,
                 self.send_t_box,
                 self.amount_z_box,
+                self.transaction_fee_box,
                 self.memo_box,
                 self.space_box,
                 self.button_z_box
@@ -425,9 +471,56 @@ class SendBox(toga.Box):
                 self.t_address_box,
                 self.send_t_box,
                 self.amount_t_box,
+                self.transaction_fee_box,
                 self.space_box,
                 self.button_t_box
             )
+            
+    
+    def on_press_button_t(self, button):
+        if self.selection_t.value.address is None:
+            self.app.main_window.error_dialog("Error", "Please select an address first.")
+        elif self.amount_t.value is None:
+            self.app.main_window.error_dialog("Error", "Please enter an amount first.")
+        elif self.address_input.value == "":
+            self.app.main_window.error_dialog("Error", "Please enter the address you want to send to.")
+        else:
+            address = self.selection_t.value.address
+            toaddress = self.address_input.value
+            amount = self.amount_t.value
+            tx_fee = self.fee_input.value
+            self.app.main_window.confirm_dialog(
+                "Details :",
+                f"From : {address}\nTo : {toaddress}\nAmount : {amount}\nFee : {tx_fee}",
+                on_result=self.confirm_t_transaction
+            )
+            
+    def confirm_t_transaction(self, widget, result):
+        if result:
+            print("OK")
+        
+    def on_press_button_z(self, button):
+        if self.selection_z.value.address is None:
+            self.app.main_window.error_dialog("Error", "Please select an address first.")
+        elif self.amount_z.value is None:
+            self.app.main_window.error_dialog("Error", "Please enter an amount first.")
+        elif self.address_input.value == "":
+            self.app.main_window.error_dialog("Error", "Please enter the address you want to send to.")
+            
+        else:
+            address = self.selection_t.value.address
+            toaddress = self.address_input.value
+            amount = self.amount_z.value
+            tx_fee = self.fee_input.value
+            self.app.main_window.confirm_dialog(
+                "Details :",
+                f"From : {address}\nTo : {toaddress}\nAmount : {amount}\nFee : {tx_fee}",
+                on_result=self.confirm_z_transaction
+            )
+            
+    def confirm_z_transaction(self, widget, result):
+        if result:
+            print("OK")
                    
                 
     async def on_change_t_selection(self, selection):
@@ -451,43 +544,15 @@ class SendBox(toga.Box):
             self.current_t_balance_label = new_balance_t_label
             await asyncio.sleep(1)
             self.t_address_box.add(self.current_t_balance_label)
+            
+            if self.amount_t.value is not None:
+                await self.check_balance_t(self.amount_t)
         else:
             if hasattr(self, 'current_t_balance_label'):
                 self.t_address_box.remove(self.current_t_balance_label)
                 
-    
-    def check_balance_t(self, number_input):
-        selected_address = self.selection_t.value.address if self.selection_t.value else None
-        if selected_address:
-            config_path = self.app.paths.config / 'config.json'
-            balance_t = get_address_balance(config_path, selected_address)
-            entered_amount = number_input.value
-            if entered_amount > balance_t:
-                self.check_amount_t_label.text = "Insufficient Balance !"
-                self.check_amount_t_label.style.color=rgb(236, 8, 8)
-            else:
-                self.check_amount_t_label.text = ""
-        else:
-            self.check_amount_t_label.text = "Select Address"
-            self.check_amount_t_label.style.color=rgb(236, 8, 8)
-            
-            
-    def check_balance_z(self, number_input):
-        selected_address = self.selection_z.value.address if self.selection_z.value else None
-        if selected_address:
-            config_path = self.app.paths.config / 'config.json'
-            balance_z = get_address_balance(config_path, selected_address)
-            entered_amount = number_input.value
-            if entered_amount > balance_z:
-                self.check_amount_z_label.text = "Insufficient Balance !"
-                self.check_amount_z_label.style.color=rgb(236, 8, 8)
-            else:
-                self.check_amount_z_label.text = "Ok !"
-        else:
-            self.check_amount_z_label.text = "Select Address"
-            self.check_amount_z_label.style.color=rgb(236, 8, 8)
-            
-    
+                
+                
     async def on_change_z_selection(self, selection):
         selected_address = selection.value.address if selection.value else None
         if selected_address:
@@ -509,9 +574,50 @@ class SendBox(toga.Box):
             self.current_z_balance_label = new_balance_z_label
             await asyncio.sleep(1)
             self.z_address_box.add(self.current_z_balance_label)
+            
+            if self.amount_z.value is not None:
+                await self.check_balance_z(self.amount_z)
         else:
             if hasattr(self, 'current_z_balance_label'):
                 self.z_address_box.remove(self.current_z_balance_label)
+                
+    
+    def check_balance_t(self, number_input):
+        selected_address = self.selection_t.value.address if self.selection_t.value else None
+        entered_amount = number_input.value
+        if selected_address and entered_amount is not None:
+            config_path = self.app.paths.config / 'config.json'
+            balance_t = get_address_balance(config_path, selected_address)
+            if entered_amount > balance_t:
+                self.check_amount_t_label.text = "Insufficient Balance !"
+                self.check_amount_t_label.style.color=rgb(236, 8, 8)
+                number_input.value = None
+            else:
+                self.check_amount_t_label.text = ""
+        else:
+            if entered_amount is not None:
+                self.check_amount_t_label.text = "Select Address"
+                self.check_amount_t_label.style.color=rgb(236, 8, 8)
+                number_input.value = None
+            
+            
+    def check_balance_z(self, number_input):
+        selected_address = self.selection_z.value.address if self.selection_z.value else None
+        entered_amount = number_input.value
+        if selected_address and entered_amount is not None:
+            config_path = self.app.paths.config / 'config.json'
+            balance_z = get_address_balance(config_path, selected_address)
+            if entered_amount > balance_z:
+                self.check_amount_z_label.text = "Insufficient Balance !"
+                self.check_amount_z_label.style.color=rgb(236, 8, 8)
+                number_input.value = None
+            else:
+                self.check_amount_z_label.text = ""
+        else:
+            if entered_amount is not None:
+                self.check_amount_z_label.text = "Select Address"
+                self.check_amount_z_label.style.color=rgb(236, 8, 8)
+                number_input.value = None
                 
                 
     def validate_address(self, widget):
