@@ -482,7 +482,7 @@ class SendBox(toga.Box):
                 self.check_amount_z_label.text = "Insufficient Balance !"
                 self.check_amount_z_label.style.color=rgb(236, 8, 8)
             else:
-                self.check_amount_z_label.text = ""
+                self.check_amount_z_label.text = "Ok !"
         else:
             self.check_amount_z_label.text = "Select Address"
             self.check_amount_z_label.style.color=rgb(236, 8, 8)
