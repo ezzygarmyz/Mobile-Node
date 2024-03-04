@@ -6,6 +6,7 @@ import asyncio
 from btczmobilenode.listaddresses import get_t_addresses, get_z_addresses
 from btczmobilenode.getbalance import get_address_balance
 from btczmobilenode.validaddress import t_validate, z_validate
+from btczmobilenode.operation import new_operation_t
 
 
 class SendBox(toga.Box):
@@ -137,8 +138,8 @@ class SendBox(toga.Box):
         
         self.addressinput_t_box = toga.Box(
             children=[
-                self.address_input,
-                self.t_label_validate
+                self.t_label_validate,
+                self.address_input
             ],
             style=Pack(
                 direction=COLUMN,
@@ -485,19 +486,21 @@ class SendBox(toga.Box):
         elif self.address_input.value == "":
             self.app.main_window.error_dialog("Error", "Please enter the address you want to send to.")
         else:
-            address = self.selection_t.value.address
-            toaddress = self.address_input.value
-            amount = self.amount_t.value
-            tx_fee = self.fee_input.value
+            self.address_t = self.selection_t.value.address
+            self.toaddress = self.address_input.value
+            self.amount_t = self.amount_t.value
+            self.tx_fee = self.fee_input.value
             self.app.main_window.confirm_dialog(
                 "Details :",
-                f"From : {address}\nTo : {toaddress}\nAmount : {amount}\nFee : {tx_fee}",
+                f"- From : {self.address_t}\n- To : {self.toaddress}\n- Amount : {self.amount_t} BTCZ\n- Fee : {self.tx_fee} BTCZ",
                 on_result=self.confirm_t_transaction
             )
             
     def confirm_t_transaction(self, widget, result):
         if result:
-            print("OK")
+            config_path = self.app.paths.config / 'config.json'
+            data = new_operation_t(config_path, self.address_t, self.toaddress, self.amount_t, self.tx_fee)
+            print(data)
         
     def on_press_button_z(self, button):
         if self.selection_z.value.address is None:
@@ -508,13 +511,17 @@ class SendBox(toga.Box):
             self.app.main_window.error_dialog("Error", "Please enter the address you want to send to.")
             
         else:
-            address = self.selection_t.value.address
-            toaddress = self.address_input.value
-            amount = self.amount_z.value
-            tx_fee = self.fee_input.value
+            self.address_z = self.selection_t.value.address
+            self.toaddress = self.address_input.value
+            self.amount_z = self.amount_z.value
+            self.tx_fee = self.fee_input.value
+            if self.memo_text_input.value == "":
+                self.memo = None
+            else:
+                self.memo = self.memo_text_input.value
             self.app.main_window.confirm_dialog(
                 "Details :",
-                f"From : {address}\nTo : {toaddress}\nAmount : {amount}\nFee : {tx_fee}",
+                f"- From : {self.address_z}\n- To : {self.toaddress}\n- Amount : {self.amount_z} BTCZ\n- Fee : {self.tx_fee} BTCZ\n- Memo : {self.memo}",
                 on_result=self.confirm_z_transaction
             )
             
@@ -594,11 +601,10 @@ class SendBox(toga.Box):
                 number_input.value = None
             else:
                 self.check_amount_t_label.text = ""
-        else:
-            if entered_amount is not None:
-                self.check_amount_t_label.text = "Select Address"
-                self.check_amount_t_label.style.color=rgb(236, 8, 8)
-                number_input.value = None
+        elif entered_amount is not None:
+            self.check_amount_t_label.text = "Select Address"
+            self.check_amount_t_label.style.color=rgb(236, 8, 8)
+            number_input.value = None
             
             
     def check_balance_z(self, number_input):
@@ -613,11 +619,10 @@ class SendBox(toga.Box):
                 number_input.value = None
             else:
                 self.check_amount_z_label.text = ""
-        else:
-            if entered_amount is not None:
-                self.check_amount_z_label.text = "Select Address"
-                self.check_amount_z_label.style.color=rgb(236, 8, 8)
-                number_input.value = None
+        elif entered_amount is not None:
+            self.check_amount_z_label.text = "Select Address"
+            self.check_amount_z_label.style.color=rgb(236, 8, 8)
+            number_input.value = None
                 
                 
     def validate_address(self, widget):
