@@ -23,9 +23,10 @@ class TransactionsBox(toga.Box):
                 reverse=True
             )
             for data in sorted_transactions: 
-                address = data["address"]
+                address = data.get("address", "Shielded")
                 category = data["category"]
                 amount = data["amount"]
+                    
                 if category == "send":
                     text = "SEND"
                     text_style = Pack(
