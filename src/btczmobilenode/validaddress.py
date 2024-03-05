@@ -10,9 +10,9 @@ def t_validate(config_path, address):
             rpc_password = config.get("rpcpassword")
             rpc_host = config.get("rpchost")
             rpc_port = config.get("rpcport")
-            url = f"http://{rpc_user}:{rpc_password}@{rpc_host}:{rpc_port}"
+            url = f"http://{rpc_host}:{rpc_port}"
 
-            headers = {"content-type": "application/json"}
+            headers = {"content-type": "text/plain"}
             payload = {
                 "jsonrpc": "1.0",
                 "id": "curltest",
@@ -42,9 +42,9 @@ def z_validate(config_path, address):
             rpc_password = config.get("rpcpassword")
             rpc_host = config.get("rpchost")
             rpc_port = config.get("rpcport")
-            url = f"http://{rpc_user}:{rpc_password}@{rpc_host}:{rpc_port}"
+            url = f"http://{rpc_host}:{rpc_port}"
 
-            headers = {"content-type": "application/json"}
+            headers = {"content-type": "text/plain"}
             payload = {
                 "jsonrpc": "1.0",
                 "id": "curltest",
