@@ -72,7 +72,13 @@ class TransactionsBox(toga.Box):
                 )
                 
                 self.transaction_button = toga.Button(
-                    "Get Info",
+                    "More Info",
+                    style=Pack(
+                        padding=10,
+                        color=rgb(240, 248, 255),
+                        background_color=rgb(60, 60, 60),
+                        font_family="monospace",
+                    ),
                     on_press=lambda widget, address=address: self.transaction_window(address)
                 )
                 
@@ -123,12 +129,12 @@ class TransactionsBox(toga.Box):
                 rpc_password = config.get("rpcpassword")
                 rpc_host = config.get("rpchost")
                 rpc_port = config.get("rpcport")
-                url = f"http://{rpc_user}:{rpc_password}@{rpc_host}:{rpc_port}"
+                url = f"http://{rpc_host}:{rpc_port}"
 
-                headers = {"content-type": "application/json"}
+                headers = {"content-type": "text/plain"}
                 payload = {
                     "jsonrpc": "1.0",
-                    "id": "0",
+                    "id": "curltest",
                     "method": "listtransactions",
                     "params": ["*", 100],
                 }
