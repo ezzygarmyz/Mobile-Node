@@ -6,7 +6,7 @@ import asyncio
 from btczmobilenode.listaddresses import get_t_addresses, get_z_addresses
 from btczmobilenode.getbalance import get_address_balance
 from btczmobilenode.validaddress import t_validate, z_validate
-from btczmobilenode.operation import new_operation_t
+from btczmobilenode.operations import new_operation_t, new_operation_z, new_operation_z_memo, check_operation_status
 
 
 class SendBox(toga.Box):
@@ -21,10 +21,15 @@ class SendBox(toga.Box):
         
         accoun_t_data = get_t_addresses(self.config_path)
         if accoun_t_data:
-            if len(accoun_t_data) == 1:
-                self.address_t_items = [(None, ""), (accoun_t_data[0], accoun_t_data[0])]
+            sorted_addresses = sorted(
+                [address_info for address_info_list in accoun_t_data for address_info in address_info_list],
+                key=lambda x: x[1],
+                reverse=True
+            )
+            if len(sorted_addresses) == 1:
+                self.address_t_items = [(None, ""), (sorted_addresses[0][0], sorted_addresses[0][0])]
             else:
-                self.address_t_items = [(None, "")] + [(address, address) for address in accoun_t_data]
+                self.address_t_items = [(None, "")] + [(address_info[0], address_info[0]) for address_info in sorted_addresses]
         else:
             self.address_t_items = [(None, "")]
             
@@ -256,7 +261,8 @@ class SendBox(toga.Box):
             style=Pack(
                 padding=5,
                 background_color=rgb(235, 186, 6),
-                color=rgb(240, 248, 255)
+                color=rgb(240, 248, 255),
+                font_family="monospace",
             ),
             on_press=self.on_press_button_t
         )
@@ -410,7 +416,8 @@ class SendBox(toga.Box):
             style=Pack(
                 padding=5,
                 background_color=rgb(0, 179, 241),
-                color=rgb(240, 248, 255)
+                color=rgb(240, 248, 255),
+                font_family="monospace",
             ),
             on_press=self.on_press_button_z
         )
@@ -499,8 +506,18 @@ class SendBox(toga.Box):
     def confirm_t_transaction(self, widget, result):
         if result:
             config_path = self.app.paths.config / 'config.json'
-            data = new_operation_t(config_path, self.address_t, self.toaddress, self.amount_t, self.tx_fee)
-            print(data)
+            operation_id = new_operation_t(config_path, self.address_t, self.toaddress, self.amount_t, self.tx_fee)
+            if operation_id:
+                self.selection_t.items.clear()
+                self.selection_t.items = self.address_t_items
+                self.address_input.value = ""
+                operation_status = check_operation_status(config_path, operation_id)
+                if isinstance(operation_status, list) and operation_status:
+                    status = operation_status[0].get("status")
+                    creation_time = operation_status[0].get("creation_time")
+                    self.app.main_window.info_dialog("Sent !", f"- Status : {status}\n- Creation time : {creation_time}")
+                    
+                
         
     def on_press_button_z(self, button):
         if self.selection_z.value.address is None:
@@ -511,23 +528,52 @@ class SendBox(toga.Box):
             self.app.main_window.error_dialog("Error", "Please enter the address you want to send to.")
             
         else:
-            self.address_z = self.selection_t.value.address
+            self.address_z = self.selection_z.value.address
             self.toaddress = self.address_input.value
             self.amount_z = self.amount_z.value
             self.tx_fee = self.fee_input.value
             if self.memo_text_input.value == "":
-                self.memo = None
+                self.app.main_window.confirm_dialog(
+                    "Details :",
+                    f"- From : {self.address_z}\n- To : {self.toaddress}\n- Amount : {self.amount_z} BTCZ\n- Fee : {self.tx_fee} BTCZ",
+                    on_result=self.confirm_z_transaction
+                )
             else:
                 self.memo = self.memo_text_input.value
-            self.app.main_window.confirm_dialog(
-                "Details :",
-                f"- From : {self.address_z}\n- To : {self.toaddress}\n- Amount : {self.amount_z} BTCZ\n- Fee : {self.tx_fee} BTCZ\n- Memo : {self.memo}",
-                on_result=self.confirm_z_transaction
-            )
+                self.app.main_window.confirm_dialog(
+                    "Details :",
+                    f"- From : {self.address_z}\n- To : {self.toaddress}\n- Amount : {self.amount_z} BTCZ\n- Fee : {self.tx_fee} BTCZ\n- Memo : {self.memo}",
+                    on_result=self.confirm_z_memo_transaction
+                )
             
     def confirm_z_transaction(self, widget, result):
         if result:
-            print("OK")
+            config_path = self.app.paths.config / 'config.json'
+            operation_id = new_operation_z(config_path, self.address_z, self.toaddress, self.amount_z, self.tx_fee)
+            if operation_id:
+                self.selection_z.items.clear()
+                self.selection_z.items = self.address_z_items
+                self.address_input.value = ""
+                operation_status = check_operation_status(config_path, operation_id)
+                if isinstance(operation_status, list) and operation_status:
+                    status = operation_status[0].get("status")
+                    creation_time = operation_status[0].get("creation_time")
+                    self.app.main_window.info_dialog("Sent !", f"- Status : {status}\n- Creation time : {creation_time}")
+                    
+                    
+    def confirm_z_memo_transaction(self, widget, result):
+        if result:
+            config_path = self.app.paths.config / 'config.json'
+            operation_id = new_operation_z_memo(config_path, self.address_z, self.toaddress, self.amount_z, self.tx_fee, self.memo)
+            if operation_id:
+                self.selection_z.items.clear()
+                self.selection_z.items = self.address_z_items
+                self.address_input.value = ""
+                operation_status = check_operation_status(config_path, operation_id)
+                if isinstance(operation_status, list) and operation_status:
+                    status = operation_status[0].get("status")
+                    creation_time = operation_status[0].get("creation_time")
+                    self.app.main_window.info_dialog("Sent !", f"- Status : {status}\n- Creation time : {creation_time}")
                    
                 
     async def on_change_t_selection(self, selection):
