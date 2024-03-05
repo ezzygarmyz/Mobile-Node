@@ -164,12 +164,12 @@ class MainBalanceBox(toga.Box):
                 rpc_password = config.get("rpcpassword")
                 rpc_host = config.get("rpchost")
                 rpc_port = config.get("rpcport")
-                url = f"http://{rpc_user}:{rpc_password}@{rpc_host}:{rpc_port}"
+                url = f"http://{rpc_host}:{rpc_port}"
 
-                headers = {"content-type": "application/json"}
+                headers = {"content-type": "text/plain"}
                 payload = {
                     "jsonrpc": "1.0",
-                    "id": "0",
+                    "id": "curltest",
                     "method": "z_gettotalbalance",
                     "params": [],
                 }
@@ -208,12 +208,12 @@ class MainBalanceBox(toga.Box):
                 rpc_password = config.get("rpcpassword")
                 rpc_host = config.get("rpchost")
                 rpc_port = config.get("rpcport")
-                url = f"http://{rpc_user}:{rpc_password}@{rpc_host}:{rpc_port}"
+                url = f"http://{rpc_host}:{rpc_port}"
 
-                headers = {"content-type": "application/json"}
+                headers = {"content-type": "text/plain"}
                 payload = {
                     "jsonrpc": "1.0",
-                    "id": "0",
+                    "id": "curltest",
                     "method": "getblockchaininfo",
                     "params": [],
                 }
