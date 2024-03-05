@@ -10,14 +10,14 @@ def get_t_addresses(config_path):
             rpc_password = config.get("rpcpassword")
             rpc_host = config.get("rpchost")
             rpc_port = config.get("rpcport")
-            url = f"http://{rpc_user}:{rpc_password}@{rpc_host}:{rpc_port}"
+            url = f"http://{rpc_host}:{rpc_port}"
 
-            headers = {"content-type": "application/json"}
+            headers = {"content-type": "text/plain"}
             payload = {
                 "jsonrpc": "1.0",
                 "id": "curltest",
-                "method": "getaddressesbyaccount",
-                "params": [""],
+                "method": "listaddressgroupings",
+                "params": [],
             }
             response = requests.post(
                 url,
@@ -41,9 +41,9 @@ def get_z_addresses(config_path):
             rpc_password = config.get("rpcpassword")
             rpc_host = config.get("rpchost")
             rpc_port = config.get("rpcport")
-            url = f"http://{rpc_user}:{rpc_password}@{rpc_host}:{rpc_port}"
+            url = f"http://{rpc_host}:{rpc_port}"
 
-            headers = {"content-type": "application/json"}
+            headers = {"content-type": "text/plain"}
             payload = {
                 "jsonrpc": "1.0",
                 "id": "curltest",
