@@ -1,10 +1,10 @@
 import toga
 from toga.colors import rgb
-from toga.style.pack import Pack, COLUMN
-import requests
-import json
-import os
+from toga.style.pack import Pack, COLUMN, ROW
 import operator
+from datetime import datetime, timezone
+
+from btczmobilenode.listtransactions import get_transactions_list, get_transaction
 
 class TransactionsBox(toga.Box):
     def __init__(self, *args, **kwargs):
@@ -13,8 +13,9 @@ class TransactionsBox(toga.Box):
     
     def set_app(self, app):
         self.app = app
+        config_path = self.app.paths.config / 'config.json'
 
-        transactions_data = self.get_transactions_list()
+        transactions_data = get_transactions_list(config_path)
         if transactions_data:
             result_data = transactions_data["result"]
             sorted_transactions = sorted(
@@ -26,6 +27,9 @@ class TransactionsBox(toga.Box):
                 address = data.get("address", "Shielded")
                 category = data["category"]
                 amount = data["amount"]
+                timereceived = data["timereceived"]
+                formatted_date_time = datetime.fromtimestamp(timereceived, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+                txid = data["txid"]
                     
                 if category == "send":
                     text = "SEND"
@@ -33,8 +37,9 @@ class TransactionsBox(toga.Box):
                         color=rgb(255, 0, 0),
                         font_size="8",
                         font_family="monospace",
-                        text_align="right",
-                        padding_right=5
+                        text_align="center",
+                        font_weight="bold",
+                        padding=5
                     )
                 else:
                     text = "RECEIVE"
@@ -42,8 +47,9 @@ class TransactionsBox(toga.Box):
                         color=rgb(9, 236, 16),
                         font_size="8",
                         font_family="monospace",
-                        text_align="right",
-                        padding_right=5
+                        text_align="center",
+                        font_weight="bold",
+                        padding=5
                     )
                 
                 self.address_label = toga.Label(
@@ -53,7 +59,7 @@ class TransactionsBox(toga.Box):
                         font_size="11",
                         font_family="monospace",
                         text_align="center",
-                        padding_top=5
+                        padding=5
                     )
                 )
                 self.category_label = toga.Label(
@@ -64,30 +70,83 @@ class TransactionsBox(toga.Box):
                     f"{amount} BTCZ",
                     style=Pack(
                         color=rgb(235, 186, 6),
-                        font_size="9",
+                        font_size="10",
                         font_family="monospace",
-                        text_align="left",
-                        padding_left=5
+                        text_align="center",
+                        padding=5,
+                        font_weight="bold"
+                    )
+                )
+                
+                self.amount_box = toga.Box(
+                    children=[
+                        self.amount_label
+                    ],
+                    style=Pack(
+                        padding=5,
+                        flex=1
+                    )
+                )
+                
+                self.category_box = toga.Box(
+                    children=[
+                        self.category_label
+                    ],
+                    style=Pack(
+                        padding=5
+                    )
+                )
+                
+                
+                self.transaction_info_box = toga.Box(
+                    children=[
+                        self.amount_box,
+                        self.category_box
+                    ],
+                    style=Pack(
+                        padding=5,
+                        direction=ROW,
+                        background_color=rgb(70, 70, 70),
+                    )
+                )
+                
+                self.time_received_label = toga.Label(
+                    f"{formatted_date_time}",
+                    style=Pack(
+                        text_align="center",
+                        font_size="10",
+                        font_family="monospace",
+                        padding=5,
+                        color=rgb(240, 248, 255)
                     )
                 )
                 
                 self.transaction_button = toga.Button(
                     "More Info",
                     style=Pack(
-                        padding=10,
                         color=rgb(240, 248, 255),
                         background_color=rgb(60, 60, 60),
                         font_family="monospace",
                     ),
-                    on_press=lambda widget, address=address: self.transaction_window(address)
+                    on_press=lambda widget, txid=txid: self.transaction_window(txid)
+                )
+                
+                self.transaction_button_box = toga.Box(
+                    children=[
+                        self.transaction_button
+                    ],
+                    style=Pack(
+                        background_color=rgb(70, 70, 70),
+                        direction=COLUMN,
+                    )
                 )
                 
                 self.transactions_list_box = toga.Box(
                     children=[
                         self.address_label,
-                        self.category_label,
-                        self.amount_label,
-                        self.transaction_button
+                        self.transaction_info_box,
+                        self.time_received_label,
+                        self.transaction_button_box
                     ],
                     style=Pack(
                     direction=COLUMN,
@@ -120,41 +179,16 @@ class TransactionsBox(toga.Box):
             self.add(self.transactions_list_box)
         
         
-    def get_transactions_list(self):
+    def transaction_window(self, txid):
         config_path = self.app.paths.config / 'config.json'
-        if os.path.exists(config_path):
-            with open(config_path, "r") as config_file:
-                config = json.load(config_file)
-                rpc_user = config.get("rpcuser")
-                rpc_password = config.get("rpcpassword")
-                rpc_host = config.get("rpchost")
-                rpc_port = config.get("rpcport")
-                url = f"http://{rpc_host}:{rpc_port}"
-
-                headers = {"content-type": "text/plain"}
-                payload = {
-                    "jsonrpc": "1.0",
-                    "id": "curltest",
-                    "method": "listtransactions",
-                    "params": ["*", 100],
-                }
-                response = requests.post(
-                    url,
-                    data=json.dumps(payload),
-                    headers=headers,
-                    auth=(rpc_user, rpc_password),
-                )
-
-                if response.status_code == 200:
-                    data = response.json()
-        
-                    return data
-                
-        else:
-            return
-        
-    def transaction_window(self, address):
-        self.app.main_window.info_dialog(
-            "Address",
-            f"{address}"
-        )
+        data_info = get_transaction(config_path, txid)
+        if data_info:
+            confirmations = data_info["confirmations"]
+            blockhash = data_info["blockhash"]
+            blockindex = data_info["blockindex"]
+            expiryheight = data_info["expiryheight"]
+            txid = data_info["txid"]
+            self.app.main_window.info_dialog(
+                "Transaction Info :",
+                f"- Confirmations : {confirmations}\n- Blockhash : {blockhash}\n- Blockindex : {blockindex}\n- Expiryheight : {expiryheight}\n- Txid : {txid}"
+            )
