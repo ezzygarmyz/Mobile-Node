@@ -1,8 +1,9 @@
 import toga
 from toga.colors import rgb
 from toga.style.pack import Pack, COLUMN, ROW
+import asyncio
 
-from btczmobilenode.blockchaininfo import get_total_balance, get_blockchain_info
+from .blockchaininfo import get_total_balance, get_blockchain_info, get_unconfirmedbalance
 
 class MainBalanceBox(toga.Box):
     def __init__(self, *args, **kwargs):
@@ -14,6 +15,54 @@ class MainBalanceBox(toga.Box):
         config_path = self.app.paths.config / 'config.json'
 
         total, transparent, private = get_total_balance(config_path)
+        
+        self.totalbalance_value = toga.Label(
+            f"{total} BTCZ",
+            style=Pack(
+                text_align="center",
+                font_size="22",
+                font_family="monospace",
+                color=rgb(240, 248, 255),
+                padding=(10, 0, 0, 0),
+                font_weight="bold"
+            )
+        )
+        
+        self.unconfirmed_balance = toga.Label(
+            f"",
+            style=Pack(
+                text_align="center",
+                font_size="10",
+                font_family="monospace",
+                font_weight="bold",
+                color=rgb(255, 0, 0),
+                padding=(5, 0, 0, 0),
+            )
+        )
+        
+        self.t_balance_value = toga.Label(
+            f"T : {transparent} BTCZ",
+            style=Pack(
+                text_align="center",
+                font_size="10",
+                font_family="monospace",
+                font_weight="bold",
+                color=rgb(235, 186, 6),
+                padding=(15, 0, 0, 0)
+            )
+        )
+        
+        self.z_balance_value = toga.Label(
+            f"Z : {private} BTCZ",
+            style=Pack(
+                text_align="center",
+                font_size="10",
+                font_family="monospace",
+                font_weight="bold",
+                color=rgb(0, 179, 241),
+                padding=(2, 0, 50, 0)
+            )
+        )
         
         self.balance_box = toga.Box(
             children=[
@@ -29,37 +78,10 @@ class MainBalanceBox(toga.Box):
                     )
                 ),
                 
-                toga.Label(
-                    f"{total} BTCZ",
-                    style=Pack(
-                        text_align="center",
-                        font_size="22",
-                        font_family="monospace",
-                        color=rgb(240, 248, 255),
-                        padding=(10, 0, 0, 0),
-                        font_weight="bold"
-                    )
-                ),
-                
-                toga.Label(
-                    f"T : {transparent} BTCZ",
-                    style=Pack(
-                        text_align="center",
-                        font_size="10",
-                        font_family="monospace",
-                        font_weight="bold",
-                        color=rgb(240, 248, 255),
-                        padding=(15, 0, 0, 0))),
-                
-                toga.Label(
-                    f"Z : {private} BTCZ",
-                    style=Pack(
-                        text_align="center",
-                        font_size="10",
-                        font_family="monospace",
-                        font_weight="bold",
-                        color=rgb(0, 179, 241),
-                        padding=(2, 0, 50, 0))),
+                self.totalbalance_value,
+                self.unconfirmed_balance,
+                self.t_balance_value,
+                self.z_balance_value,
             ],
             style=Pack(
                 direction=COLUMN,
@@ -88,7 +110,62 @@ class MainBalanceBox(toga.Box):
                 padding=5)
         )
         
-        blocks, header, difficulty, disk_size, commitments = get_blockchain_info(config_path)
+        chain, blocks, header, bestblock, verificationprogress, difficulty, disk_size, commitments = get_blockchain_info(config_path)
+        
+        self.chain_label = toga.Label(
+            f"Chain :",
+            style=Pack(
+                font_size="10",
+                font_family="monospace",
+                font_weight="bold",
+                text_align="center",
+                color=rgb(240, 248, 255),
+                padding=5
+            )
+        )
+        
+        self.chain_label_box = toga.Box(
+            children=[
+                self.chain_label
+            ],
+            style=Pack(
+                padding=5,
+                flex=1
+            )
+        )
+        
+        self.chain_value = toga.Label(
+            f"{chain}",
+            style=Pack(
+                font_size="10",
+                font_family="monospace",
+                font_weight="bold",
+                text_align="center",
+                color=rgb(240, 248, 255),
+                padding=5
+            )
+        )
+        
+        self.chain_value_box = toga.Box(
+            children=[
+                self.chain_value
+            ],
+            style=Pack(
+                padding=5
+            )
+        )
+        
+        self.chain_line = toga.Box(
+            children=[
+                self.chain_label_box,
+                self.chain_value_box
+            ],
+            style=Pack(
+                padding=(5, 20, 5, 20),
+                direction=ROW,
+                background_color=rgb(70, 70, 70)
+            )
+        )
         
         self.blocks_label = toga.Label(
             f"Blocks :",
@@ -192,6 +269,115 @@ class MainBalanceBox(toga.Box):
             children=[
                 self.headers_label_box,
                 self.headers_value_box
+            ],
+            style=Pack(
+                padding=(5, 20, 5, 20),
+                direction=ROW,
+                background_color=rgb(70, 70, 70)
+            )
+        )
+        
+        self.bestblock_label = toga.Label(
+            f"Bestblock :", 
+            style=Pack(
+                font_size="10",
+                font_family="monospace",
+                font_weight="bold",
+                text_align="center",
+                color=rgb(240, 248, 255),
+                padding=5
+            )
+        )
+        
+        self.bestblock_label_box = toga.Box(
+            children=[
+                self.bestblock_label
+            ],
+            style=Pack(
+                padding=5,
+                flex=1
+            )
+        )
+        
+        self.bestblock_value = toga.Label(
+            f"{bestblock}", 
+            style=Pack(
+                font_size="10",
+                font_family="monospace",
+                font_weight="bold",
+                text_align="center",
+                color=rgb(240, 248, 255),
+                padding=5
+            )
+        )
+        
+        self.bestblock_value_box = toga.Box(
+            children=[
+                self.bestblock_value
+            ],
+            style=Pack(
+                padding=5
+            )
+        )
+        
+        self.bestblock_line = toga.Box(
+            children=[
+                self.bestblock_label_box,
+                self.bestblock_value_box
+            ],
+            style=Pack(
+                padding=(5, 20, 5, 20),
+                direction=ROW,
+                background_color=rgb(70, 70, 70)
+            )
+        )
+        
+        self.verificationprogress_label = toga.Label(
+            f"Synchronization :", 
+            style=Pack(
+                font_size="10",
+                font_family="monospace",
+                font_weight="bold",
+                text_align="center",
+                color=rgb(240, 248, 255),
+                padding=5
+            )
+        )
+        
+        self.verificationprogress_label_box = toga.Box(
+            children=[
+                self.verificationprogress_label
+            ],
+            style=Pack(
+                padding=5,
+                flex=1
+            )
+        )
+        self.verificationprogress_value = toga.Label(
+            f"{float(verificationprogress):.2f}%", 
+            style=Pack(
+                font_size="10",
+                font_family="monospace",
+                font_weight="bold",
+                text_align="center",
+                color=rgb(240, 248, 255),
+                padding=5
+            )
+        )
+        
+        self.verificationprogress_value_box = toga.Box(
+            children=[
+                self.verificationprogress_value
+            ],
+            style=Pack(
+                padding=5
+            )
+        )
+        
+        self.verificationprogress_line = toga.Box(
+            children=[
+                self.verificationprogress_label_box,
+                self.verificationprogress_value_box
             ],
             style=Pack(
                 padding=(5, 20, 5, 20),
@@ -367,8 +553,11 @@ class MainBalanceBox(toga.Box):
         
         self.blockchain_info = toga.Box(
             children=[
+                self.chain_line,
                 self.blocks_line,
                 self.headers_line,
+                self.bestblock_line,
+                self.verificationprogress_line,
                 self.difficulty_line,
                 self.commitments_line,
                 self.sizeondisk_line
@@ -385,3 +574,50 @@ class MainBalanceBox(toga.Box):
             self.balances_box_devider,
             self.blockchain_info
         )
+        
+        self.app.add_background_task(
+            self.task_update_blockchaininfo
+        )
+        
+        self.app.add_background_task(
+            self.task_update_totalbalance
+        )
+        
+        self.app.add_background_task(
+            self.task_update_getunconfirmedbalance
+        )
+        
+    async def task_update_blockchaininfo(self, *args):
+        config_path = self.app.paths.config / 'config.json'
+        while True:
+            chain, blocks, header, bestblock, verificationprogress, difficulty, disk_size, commitments = get_blockchain_info(config_path)
+            self.chain_value.text = f"{chain}"
+            self.blocks_value.text = f"{blocks}"
+            self.headers_value.text = f"{header}"
+            self.bestblock_value.text = f"{bestblock}"
+            self.verificationprogress_value.text = f"{float(verificationprogress):.2f}%"
+            self.difficulty_value.text = f"{float(difficulty):.2f}"
+            self.sizeondisk_value.text = f"{float(disk_size):.1f} GB"
+            self.commitments_value.text = f"{commitments}"
+            await asyncio.sleep(15)
+            
+            
+    async def task_update_totalbalance(self, *args):
+        config_path = self.app.paths.config / 'config.json'
+        while True:
+            total, transparent, private = get_total_balance(config_path)
+            self.totalbalance_value.text = f"{total} BTCZ"
+            self.t_balance_value.text = f"T : {transparent} BTCZ"
+            self.z_balance_value.text = f"Z : {private} BTCZ"
+            await asyncio.sleep(15)
+            
+    
+    async def task_update_getunconfirmedbalance(self, *args):
+        config_path = self.app.paths.config / 'config.json'
+        while True:
+            unconfirmedbalance = get_unconfirmedbalance(config_path)
+            if float(unconfirmedbalance) > 0:
+                self.unconfirmed_balance.text = f"UnConf. Bal : {float(unconfirmedbalance)} BTCZ"
+            else:
+                self.unconfirmed_balance.text = ""
+            await asyncio.sleep(15)
