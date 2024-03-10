@@ -4,11 +4,12 @@ from toga.style.pack import COLUMN, Pack
 import json
 import os
 
-from btczmobilenode.home import MainBalanceBox
-from btczmobilenode.send import SendBox
-from btczmobilenode.wallet import WalletBox
-from btczmobilenode.settings import RPCSettingsBox
-from btczmobilenode.transactions import TransactionsBox
+from .home import MainBalanceBox
+from .send import SendBox
+from .wallet import WalletBox
+from .settings import RPCSettingsBox
+from .transactions import TransactionsBox
+from .features import FeaturesBox
 
 
 class MobileApp(toga.App):
@@ -21,29 +22,42 @@ class MobileApp(toga.App):
         self.main_balance_box = MainBalanceBox(
             style=Pack(
                 direction=COLUMN,
-                background_color=rgb(25, 25, 25))
+                background_color=rgb(25, 25, 25)
+            )
         )
         self.main_balance_box.set_app(self)
         
         self.main_send_box = SendBox(
             style=Pack(
                 direction=COLUMN,
-                background_color=rgb(25, 25, 25))
+                background_color=rgb(25, 25, 25)
+            )
         )
         self.main_send_box.set_app(self)
         
         self.main_wallet_box = WalletBox(
             style=Pack(
                 direction=COLUMN,
-                background_color=rgb(25, 25, 25))
+                background_color=rgb(25, 25, 25)
+            )
         )
         
         self.main_transactions_box = TransactionsBox(
             style=Pack(
                 direction=COLUMN,
-                background_color=rgb(25, 25, 25))
+                background_color=rgb(25, 25, 25)
+            )
         )
         self.main_transactions_box.set_app(self)
+        
+        
+        self.main_features_box = FeaturesBox(
+            style=Pack(
+                direction=COLUMN,
+                background_color=rgb(25, 25, 25)
+            )
+        )
+        self.main_features_box.set_app(self)
         
         self.setting_command = toga.Command(
             action=self.rpc_settings,
@@ -55,7 +69,8 @@ class MobileApp(toga.App):
         self.rpc_settings_box = RPCSettingsBox(
             style=Pack(
                 direction=COLUMN,
-                background_color=rgb(25, 25, 25))
+                background_color=rgb(25, 25, 25)
+            )
         )
         self.rpc_settings_box.set_app(self, self.setting_command)
         
@@ -73,6 +88,12 @@ class MobileApp(toga.App):
         
         self.main_transactions_scorll = toga.ScrollContainer(
             content=self.main_transactions_box,
+            vertical=True,
+            horizontal=False
+        )
+        
+        self.main_features_scorll = toga.ScrollContainer(
+            content=self.main_features_box,
             vertical=True,
             horizontal=False
         )
@@ -98,6 +119,11 @@ class MobileApp(toga.App):
                 toga.OptionItem(
                     "Wallet",
                     self.main_wallet_box,
+                    enabled=True),
+                
+                toga.OptionItem(
+                    "Features",
+                    self.main_features_box,
                     enabled=True),
             ],
         )
@@ -130,7 +156,7 @@ class MobileApp(toga.App):
                 self.rpc_settings_box.rpc_password_box.children[1].value = config.get('rpcpassword', '')
                 self.rpc_settings_box.rpc_host_box.children[1].value = config.get('rpchost', '')
                 self.rpc_settings_box.rpc_port_box.children[1].value = config.get('rpcport', '')
-
+        
 
 def main():
     app = MobileApp(
