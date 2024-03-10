@@ -3,10 +3,10 @@ from toga.colors import rgb
 from toga.style.pack import Pack, COLUMN
 import asyncio
 
-from btczmobilenode.listaddresses import get_t_addresses, get_z_addresses
-from btczmobilenode.getbalance import get_address_balance
-from btczmobilenode.validaddress import t_validate, z_validate
-from btczmobilenode.operations import new_operation_t, new_operation_z, new_operation_z_memo, check_operation_status
+from .listaddresses import get_t_addresses, get_z_addresses
+from .getbalance import get_address_balance
+from .validaddress import t_validate, z_validate
+from .operations import new_operation_t, new_operation_z, new_operation_z_memo, check_operation_status
 
 
 class SendBox(toga.Box):
