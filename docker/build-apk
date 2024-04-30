@@ -1,0 +1,84 @@
+FROM debian:12.5
+
+ENV MAIN_DIR /root
+ENV APP_DIR /root/mobileznode
+ENV GIT_REPO https://github.com/ezzygarmyz/mobileznode.git
+ENV JAVA_HOME /opt/openjdk
+ENV ANDROID_HOME /opt/sdk
+ENV OPENJDK_FILE openjdk-17_linux-x64_bin.tar.gz
+ENV TOOLS_FILE commandlinetools-linux-9477386_latest.zip
+ENV TMP_DIR /tmp
+
+WORKDIR ${MAIN_DIR}
+
+# Install wget to download files
+RUN echo "[Install wget to download files...]" \
+    && apt update -yq && apt upgrade -yq \
+    && apt install -yq \
+        wget
+
+# Download and extract OpenJDK
+RUN echo "[Download and extract OpenJDK...]" \
+    && wget https://download.java.net/java/GA/jdk17/0d483333a00540d886896bac774ff48b/35/GPL/${OPENJDK_FILE} \
+    && mkdir ${JAVA_HOME} \
+    && tar -xzf ${OPENJDK_FILE} -C ${JAVA_HOME} --strip-components=1 \
+    && chmod +x -R ${JAVA_HOME}
+
+# Set environment variables
+RUN /bin/bash -c "export JAVA_HOME=${JAVA_HOME}"
+
+# Install required packages
+RUN echo "[Install required packages...]" \
+    && apt install -yq \
+        unzip
+
+# Install Android SDK
+RUN echo "[Install Android SDK...]" \
+    && wget https://dl.google.com/android/repository/$TOOLS_FILE \
+    && unzip -q ${TOOLS_FILE} -d ${TMP_DIR} 
+
+WORKDIR ${TMP_DIR}/cmdline-tools
+
+RUN mkdir 9.0 \
+    && mv bin 9.0 \
+    && mv lib 9.0 \
+    && mv NOTICE.txt 9.0 \
+    && mv source.properties 9.0
+
+
+WORKDIR ${TMP_DIR}
+
+RUN mv cmdline-tools ${ANDROID_HOME} \
+    && chmod +x -R ${ANDROID_HOME}
+
+WORKDIR ${ANDROID_HOME}
+
+RUN mkdir cmdline-tools \
+    && mv 9.0 cmdline-tools
+
+WORKDIR ${MAIN_DIR}
+
+RUN /bin/bash -c "export ANDROID_HOME=${ANDROID_HOME}"
+
+RUN yes | ${ANDROID_HOME}/cmdline-tools/9.0/bin/sdkmanager --licenses 
+
+RUN echo "[Install required packages...]" \
+    && apt install -yq \
+        git \
+        python3-pip \
+        python3-venv 
+
+RUN git clone ${GIT_REPO}
+
+WORKDIR ${APP_DIR}
+
+# Create and activate the virtual environment
+RUN echo "[Create and activate the virtual environment...]" \
+    && python3 -m venv env \
+    && /bin/bash -c "source env/bin/activate" \
+    && env/bin/pip install --upgrade pip \
+    && env/bin/pip install briefcase==0.3.17
+
+# Build the Android app
+RUN echo "[Build the Android app...]" \
+    && env/bin/briefcase build android

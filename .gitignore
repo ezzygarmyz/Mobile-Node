@@ -29,11 +29,11 @@ Temporary Items
 
 # C extensions
 *.so
+*.apk
 
 # Distribution / packaging
 .Python
 env/
-build/
 develop-eggs/
 dist/
 downloads/
