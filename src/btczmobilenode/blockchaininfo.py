@@ -92,8 +92,6 @@ def get_blockchain_info(config_path):
                 chain = data_result["chain"]
                 blocks = data_result["blocks"]
                 header = data_result["headers"]
-                bestblock = data_result["bestblockhash"]
-                bestblockheight = get_block_height(config_path ,bestblock)
                 verificationprogress = data_result["verificationprogress"]
                 verificationpercentage = verificationprogress * 100
                 difficulty = data_result["difficulty"]
@@ -104,44 +102,11 @@ def get_blockchain_info(config_path):
         chain = "None"
         blocks = "0"
         header = "0"
-        bestblockheight = "0"
         verificationpercentage = "0.00"
         difficulty = "0.00"
         disk_size_gb = "0.00"
         commitments = "0"
-    return chain, blocks, header, bestblockheight, verificationpercentage, difficulty, disk_size_gb, commitments
-
-
-def get_block_height(config_path ,bestblock):
-    if os.path.exists(config_path):
-        with open(config_path, "r") as config_file:
-            config = json.load(config_file)
-            rpc_user = config.get("rpcuser")
-            rpc_password = config.get("rpcpassword")
-            rpc_host = config.get("rpchost")
-            rpc_port = config.get("rpcport")
-            url = f"http://{rpc_host}:{rpc_port}"
-
-            headers = {"content-type": "text/plain"}
-            payload = {
-                "jsonrpc": "1.0",
-                "id": "curltest",
-                "method": "getblock",
-                "params": [f"{bestblock}"],
-            }
-            response = requests.post(
-                url,
-                data=json.dumps(payload),
-                headers=headers,
-                auth=(rpc_user, rpc_password),
-            )
-
-            if response.status_code == 200:
-                data = response.json()
-                data_result = data["result"]
-                height = data_result["height"]
-                
-                return height
+    return chain, blocks, header, verificationpercentage, difficulty, disk_size_gb, commitments
             
             
 def get_unconfirmedbalance(config_path):
@@ -173,3 +138,35 @@ def get_unconfirmedbalance(config_path):
                 data_result = data["result"]
                 
                 return data_result
+            
+            
+def get_deprecationinfo(config_path):
+    if os.path.exists(config_path):
+        with open(config_path, "r") as config_file:
+            config = json.load(config_file)
+            rpc_user = config.get("rpcuser")
+            rpc_password = config.get("rpcpassword")
+            rpc_host = config.get("rpchost")
+            rpc_port = config.get("rpcport")
+            url = f"http://{rpc_host}:{rpc_port}"
+
+            headers = {"content-type": "text/plain"}
+            payload = {
+                "jsonrpc": "1.0",
+                "id": "curltest",
+                "method": "getdeprecationinfo",
+                "params": [],
+            }
+            response = requests.post(
+                url,
+                data=json.dumps(payload),
+                headers=headers,
+                auth=(rpc_user, rpc_password),
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                data_result = data["result"]
+                deprecationheight = data_result["deprecationheight"]
+                
+                return deprecationheight

@@ -3,7 +3,7 @@ from toga.colors import rgb
 from toga.style.pack import Pack, COLUMN, ROW
 import asyncio
 
-from .blockchaininfo import get_total_balance, get_blockchain_info, get_unconfirmedbalance
+from .blockchaininfo import get_total_balance, get_blockchain_info, get_unconfirmedbalance, get_deprecationinfo
 
 class MainBalanceBox(toga.Box):
     def __init__(self, *args, **kwargs):
@@ -110,7 +110,7 @@ class MainBalanceBox(toga.Box):
                 padding=5)
         )
         
-        chain, blocks, header, bestblock, verificationprogress, difficulty, disk_size, commitments = get_blockchain_info(config_path)
+        chain, blocks, header, verificationprogress, difficulty, disk_size, commitments = get_blockchain_info(config_path)
         
         self.chain_label = toga.Label(
             f"Chain :",
@@ -277,8 +277,10 @@ class MainBalanceBox(toga.Box):
             )
         )
         
-        self.bestblock_label = toga.Label(
-            f"Bestblock :", 
+        deprecationheight = get_deprecationinfo(config_path)
+        
+        self.deprecation_label = toga.Label(
+            f"Deprecation :", 
             style=Pack(
                 font_size="10",
                 font_family="monospace",
@@ -289,9 +291,9 @@ class MainBalanceBox(toga.Box):
             )
         )
         
-        self.bestblock_label_box = toga.Box(
+        self.deprecation_label_box = toga.Box(
             children=[
-                self.bestblock_label
+                self.deprecation_label
             ],
             style=Pack(
                 padding=5,
@@ -299,8 +301,8 @@ class MainBalanceBox(toga.Box):
             )
         )
         
-        self.bestblock_value = toga.Label(
-            f"{bestblock}", 
+        self.deprecation_value = toga.Label(
+            f"{deprecationheight}", 
             style=Pack(
                 font_size="10",
                 font_family="monospace",
@@ -311,19 +313,19 @@ class MainBalanceBox(toga.Box):
             )
         )
         
-        self.bestblock_value_box = toga.Box(
+        self.deprecation_value_box = toga.Box(
             children=[
-                self.bestblock_value
+                self.deprecation_value
             ],
             style=Pack(
                 padding=5
             )
         )
         
-        self.bestblock_line = toga.Box(
+        self.deprecation_line = toga.Box(
             children=[
-                self.bestblock_label_box,
-                self.bestblock_value_box
+                self.deprecation_label_box,
+                self.deprecation_value_box
             ],
             style=Pack(
                 padding=(5, 20, 5, 20),
@@ -556,7 +558,7 @@ class MainBalanceBox(toga.Box):
                 self.chain_line,
                 self.blocks_line,
                 self.headers_line,
-                self.bestblock_line,
+                self.deprecation_line,
                 self.verificationprogress_line,
                 self.difficulty_line,
                 self.commitments_line,
@@ -594,7 +596,7 @@ class MainBalanceBox(toga.Box):
             self.chain_value.text = f"{chain}"
             self.blocks_value.text = f"{blocks}"
             self.headers_value.text = f"{header}"
-            self.bestblock_value.text = f"{bestblock}"
+            self.deprecation_value.text = f"{bestblock}"
             self.verificationprogress_value.text = f"{float(verificationprogress):.2f}%"
             self.difficulty_value.text = f"{float(difficulty):.2f}"
             self.sizeondisk_value.text = f"{float(disk_size):.1f} GB"
