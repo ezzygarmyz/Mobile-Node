@@ -3,15 +3,15 @@
 project_name = "BitcoinZ Mobile Node"
 bundle = "com.btcz.bitcoinz"
 version = "1.0.0"
-url = "https://bitcoinz.btcz.com/btczmobilenode"
+url = "https://www.getbtcz.com"
 license = "GNU General Public License v3 or later (GPLv3+)"
-author = "EzzyG"
-author_email = "ezzyg@bitcoinz.btcz.com"
+author = "BTCZapp"
+author_email = "dragkhai@gmail.com"
 
 [tool.briefcase.app.btczmobilenode]
 formal_name = "Mobile Node"
-description = "later..."
-long_description = """More details about the app should go here.
+description = "Description : Mobile Node is a application designed to facilitate the management of BitcoinZ full nodes using the Termux environment in a local connection. With this app, users can effortlessly set up and control their BitcoinZ full node directly from their mobile device, offering convenience and accessibility to max features."
+long_description = """Description : Mobile Node is a application designed to facilitate the management of BitcoinZ full nodes using the Termux environment in a local connection. With this app, users can effortlessly set up and control their BitcoinZ full node directly from their mobile device, offering convenience and accessibility to max features.
 """
 icon = "src/btczmobilenode/resources/logo"
 sources = [

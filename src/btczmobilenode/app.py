@@ -160,15 +160,12 @@ class MobileApp(toga.App):
 
 def main():
     app = MobileApp(
-        icon="resources/btczmobilenode",
+        icon="resources/logo",
         formal_name="Mobile Node",
         app_id="com.btcz.bitcoinz",
         home_page="https://www.getbtcz.com",
         version="1.0.0",
-        author="EzzyG",
-        description="Description : Mobile Node is a application designed to facilitate the management of BitcoinZ full nodes using the Termux environment in a local connection."
-                    "With this app, users can effortlessly set up and control their BitcoinZ full node directly from their mobile device,"
-                    "offering convenience and accessibility to max features.",
+        author="BTCZapp"
         
     )
     return app
