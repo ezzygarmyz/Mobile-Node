@@ -1,5 +1,5 @@
 # to build apk install briefcase
 
 toga-android~=0.4.2
-requests~=2.21.0
+requests~=2.31.0
 urllib3~=2.2.1
