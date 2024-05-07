@@ -162,7 +162,7 @@ def main():
     app = MobileApp(
         icon="resources/logo",
         formal_name="Mobile Node",
-        app_id="com.btcz.bitcoinz",
+        app_id="com.btcz",
         home_page="https://www.getbtcz.com",
         version="1.0.0",
         author="BTCZapp"

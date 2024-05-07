@@ -1,0 +1,67 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.chaquo.python'
+
+android {
+    // Android 14 == SDK Level 34. This number should generally be kept up to date with
+    // the most recent supported Android release.
+    compileSdkVersion 34
+
+    namespace "com.btcz.mobileznode"
+
+    defaultConfig {
+        applicationId "com.btcz.mobileznode"
+        versionCode 1000000
+        versionName "1.0.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Briefcase currently requires API Level 24 for the `pidof` command, and the `--pid`
+        // argument to `adb logcat`. This supports over 90% of active devices
+        // (https://github.com/beeware/rubicon-java/issues/74).
+        minSdkVersion 24
+        // This should gnerally match the compileSDKVersion from above.
+        targetSdkVersion 34
+
+        python {
+            version "3.12"
+            pip {
+                install "-r", "requirements.txt"
+            }
+            extractPackages "tests"
+        }
+        ndk {
+            
+            // For this Python version, only 64-bit ABIs are available.
+            abiFilters "arm64-v8a", "x86_64"
+            
+        }
+    }
+
+    compileOptions {
+      sourceCompatibility JavaVersion.VERSION_1_8
+      targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main {
+            python.srcDirs = [
+                "src/main/python",  // App code
+                "src/main/python-briefcase",  // Template code
+            ]
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "com.google.android.material:material:1.11.0"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+}
+
+// ========== START USER PROVIDED CONTENT ==========
+

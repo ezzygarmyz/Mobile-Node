@@ -2,8 +2,7 @@ import requests
 import json
 import os
 
-
-def get_transactions_list(config_path):
+def t_validate(config_path, address):
     if os.path.exists(config_path):
         with open(config_path, "r") as config_file:
             config = json.load(config_file)
@@ -17,8 +16,8 @@ def get_transactions_list(config_path):
             payload = {
                 "jsonrpc": "1.0",
                 "id": "curltest",
-                "method": "listtransactions",
-                "params": ["*", 100],
+                "method": "validateaddress",
+                "params": [address],
             }
             response = requests.post(
                 url,
@@ -29,14 +28,13 @@ def get_transactions_list(config_path):
 
             if response.status_code == 200:
                 data = response.json()
-        
-                return data
+                data_result = data.get("result", {})
+                is_valid = data_result.get("isvalid", False)
                 
-    else:
-        return
-    
-    
-def get_transaction(config_path, txid):
+                return is_valid
+            
+
+def z_validate(config_path, address):
     if os.path.exists(config_path):
         with open(config_path, "r") as config_file:
             config = json.load(config_file)
@@ -50,8 +48,8 @@ def get_transaction(config_path, txid):
             payload = {
                 "jsonrpc": "1.0",
                 "id": "curltest",
-                "method": "gettransaction",
-                "params": [f"{txid}"],
+                "method": "z_validateaddress",
+                "params": [address],
             }
             response = requests.post(
                 url,
@@ -62,6 +60,7 @@ def get_transaction(config_path, txid):
 
             if response.status_code == 200:
                 data = response.json()
-                data_result = data["result"]
-        
-                return data_result
+                data_result = data.get("result", {})
+                is_valid = data_result.get("isvalid", False)
+                
+                return is_valid

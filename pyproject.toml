@@ -1,21 +1,20 @@
-# This project was generated with 0.3.17 using template: https://github.com/beeware/briefcase-template@v0.3.17
 [tool.briefcase]
 project_name = "BitcoinZ Mobile Node"
-bundle = "com.btcz.bitcoinz"
+bundle = "com.btcz"
 version = "1.0.0"
 url = "https://www.getbtcz.com"
 license = "GNU General Public License v3 or later (GPLv3+)"
 author = "BTCZapp"
 author_email = "dragkhai@gmail.com"
 
-[tool.briefcase.app.btczmobilenode]
+[tool.briefcase.app.mobileznode]
 formal_name = "Mobile Node"
 description = "Description : Mobile Node is a application designed to facilitate the management of BitcoinZ full nodes using the Termux environment in a local connection. With this app, users can effortlessly set up and control their BitcoinZ full node directly from their mobile device, offering convenience and accessibility to max features."
 long_description = """Description : Mobile Node is a application designed to facilitate the management of BitcoinZ full nodes using the Termux environment in a local connection. With this app, users can effortlessly set up and control their BitcoinZ full node directly from their mobile device, offering convenience and accessibility to max features.
 """
-icon = "src/btczmobilenode/resources/logo"
+icon = "src/mobileznode/resources/logo"
 sources = [
-    "src/btczmobilenode",
+    "src/mobileznode",
 ]
 test_sources = [
     "tests",
@@ -25,11 +24,10 @@ test_requires = [
     "pytest",
 ]
 
-[tool.briefcase.app.btczmobilenode.android]
+[tool.briefcase.app.mobileznode.android]
 requires = [
     "toga-android~=0.4.2",
-    "requests~=2.21.0",
-    "urllib3~=2.2.1",
+    "requests~=2.31.0",
 ]
 
 build_gradle_dependencies = [
